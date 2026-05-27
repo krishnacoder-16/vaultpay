@@ -8,9 +8,8 @@ import { ShieldCheck, UserCheck, Mail, ArrowRight, Loader2, Sparkles } from 'luc
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/invoices';
 
-  const { login, isAuthenticated, initialize, isLoading } = useAuthStore();
+  const { login, isAuthenticated, user, initialize, isLoading } = useAuthStore();
 
   const [email, setEmail] = useState('demo@vaultpay.io');
   const [role, setRole] = useState<'CLIENT' | 'ADMIN'>('CLIENT');
@@ -21,10 +20,12 @@ export default function LoginPage() {
   }, [initialize]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push(callbackUrl);
+    if (isAuthenticated && user) {
+      // Sovereign dynamic routing based on the authorized profile role
+      const targetDestination = searchParams.get('callbackUrl') || (user.role === 'ADMIN' ? '/settings' : '/invoices');
+      router.push(targetDestination);
     }
-  }, [isAuthenticated, router, callbackUrl]);
+  }, [isAuthenticated, user, router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

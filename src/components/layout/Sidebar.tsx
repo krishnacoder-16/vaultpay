@@ -14,18 +14,19 @@ export default function Sidebar() {
     await logout();
   };
 
+  // Structured menu items with strict role mapping
   const navItems = [
     {
       name: 'Invoices',
       href: '/invoices',
       icon: FileText,
-      role: 'ALL',
+      role: 'CLIENT',
     },
     {
       name: 'Payments',
       href: '/payments',
       icon: CreditCard,
-      role: 'ALL',
+      role: 'CLIENT',
     },
     {
       name: 'Admin Settings',
@@ -40,7 +41,7 @@ export default function Sidebar() {
     <aside className="w-64 border-r border-slate-200/80 bg-white flex flex-col h-full text-slate-800 shadow-[1px_0_4px_rgba(0,0,0,0.01)]">
       {/* Brand Header */}
       <div className="h-16 flex items-center px-6 border-b border-slate-100">
-        <Link href="/invoices" className="flex items-center gap-2.5">
+        <Link href={user?.role === 'ADMIN' ? '/settings' : '/invoices'} className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
             <Sparkles className="h-4.5 w-4.5" />
           </div>
@@ -50,10 +51,10 @@ export default function Sidebar() {
         </Link>
       </div>
 
-      {/* Nav Menu Items */}
+      {/* Nav Menu Items - Dynamically Filtered */}
       <nav className="flex-1 py-6 px-4 space-y-1">
         {navItems
-          .filter((item) => item.role === 'ALL' || (user?.role === 'ADMIN' && item.role === 'ADMIN'))
+          .filter((item) => user?.role === item.role)
           .map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;

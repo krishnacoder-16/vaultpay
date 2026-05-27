@@ -15,20 +15,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     initialize();
   }, [initialize]);
 
-  // Handle client-side fallback redirect if store reports unauthenticated after loading finishes
+  // Client-side fail-safe redirect
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/login');
     }
   }, [isLoading, isAuthenticated, router]);
 
+  // Clean, high-trust Session Initialization Screen
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full bg-slate-50 flex flex-col items-center justify-center text-slate-900">
+      <div className="min-h-screen w-full bg-slate-50/50 flex flex-col items-center justify-center text-slate-800">
         <div className="relative flex flex-col items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mb-4" />
-          <p className="text-xs text-slate-400 uppercase tracking-widest font-bold animate-pulse">
-            Decrypting Core Sessions...
+          <Loader2 className="h-6 w-6 animate-spin text-indigo-600 mb-3" />
+          <p className="text-[11px] text-slate-400 uppercase tracking-widest font-extrabold animate-pulse">
+            Verifying secure session...
           </p>
         </div>
       </div>
@@ -36,20 +37,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   if (!isAuthenticated) {
-    return null; // Stop flashing content before redirect
+    return null; // Block flashing children before redirect completes
   }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900">
-      {/* Primary Sidebar Layout */}
+      {/* Dynamic Sidebar Shell */}
       <Sidebar />
 
-      {/* Main Container Layer */}
+      {/* Main Workspace Frame */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navbar */}
         <Navbar />
 
-        {/* Scrollable Workspace panel */}
+        {/* Scrollable Workstation */}
         <main className="flex-1 overflow-y-auto bg-[#fafbfc] p-8">
           {children}
         </main>

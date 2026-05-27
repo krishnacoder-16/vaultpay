@@ -16,6 +16,17 @@ interface AuthState {
   initialize: () => void;
 }
 
+// Simple cookie extraction utility
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift() || null;
+  }
+  return null;
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
@@ -25,20 +36,46 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window === 'undefined') return;
 
     try {
-      const savedUser = localStorage.getItem('vp_user');
-      const savedCookie = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('vp_role='));
+      // 1. The Cookie is the security authority
+      const activeRole = getCookie('vp_role') as 'CLIENT' | 'ADMIN' | null;
 
-      if (savedUser && savedCookie) {
-        const user = JSON.parse(savedUser) as User;
-        set({ user, isAuthenticated: true, isLoading: false });
-      } else {
-        // Clear any orphaned data
+      if (!activeRole) {
+        // No session cookie exists -> force unauthenticated state
         localStorage.removeItem('vp_user');
         set({ user: null, isAuthenticated: false, isLoading: false });
+        return;
       }
+
+      // 2. LocalStorage acts as a display convenience only
+      const savedUserStr = localStorage.getItem('vp_user');
+      let hydratedUser: User | null = null;
+
+      if (savedUserStr) {
+        const parsed = JSON.parse(savedUserStr) as User;
+        // Verify that the localStorage role perfectly aligns with the sovereign cookie role
+        if (parsed.role === activeRole) {
+          hydratedUser = parsed;
+        }
+      }
+
+      // 3. Fallback profile if localStorage was cleared but cookie remains
+      if (!hydratedUser) {
+        hydratedUser = {
+          id: activeRole === 'ADMIN' ? 'usr_admin_default' : 'usr_client_default',
+          email: activeRole === 'ADMIN' ? 'compliance@vaultpay.io' : 'merchant@vaultpay.io',
+          name: activeRole === 'ADMIN' ? 'Compliance Admin' : 'Merchant Client',
+          role: activeRole,
+        };
+        localStorage.setItem('vp_user', JSON.stringify(hydratedUser));
+      }
+
+      set({
+        user: hydratedUser,
+        isAuthenticated: true,
+        isLoading: false,
+      });
     } catch {
+      localStorage.removeItem('vp_user');
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
@@ -46,35 +83,38 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email: string, role: 'CLIENT' | 'ADMIN') => {
     set({ isLoading: true });
 
-    // Mock API latency
+    // Mock network latency for realistic SaaS UX
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    const mockUser: User = {
+    const sessionUser: User = {
       id: role === 'ADMIN' ? 'usr_admin_01' : 'usr_client_01',
       email: email,
       name: role === 'ADMIN' ? 'Compliance Admin' : 'Merchant Client',
       role,
     };
 
-    // Set persistence values
     if (typeof window !== 'undefined') {
-      localStorage.setItem('vp_user', JSON.stringify(mockUser));
-      // Set session cookie for Middleware edge routing
+      // Sovereign Cookie Authority: Set session cookie for Edge Middleware checks
       document.cookie = `vp_role=${role}; path=/; max-age=86400; SameSite=Lax`;
+      
+      // Optional display persistence
+      localStorage.setItem('vp_user', JSON.stringify(sessionUser));
     }
 
-    set({ user: mockUser, isAuthenticated: true, isLoading: false });
+    set({ user: sessionUser, isAuthenticated: true, isLoading: false });
   },
 
   logout: async () => {
     set({ isLoading: true });
 
-    // Mock API latency
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Simulated API request
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
     if (typeof window !== 'undefined') {
+      // Clear display persistence
       localStorage.removeItem('vp_user');
-      // Expire session cookie
+      
+      // Expire sovereign session cookie
       document.cookie = 'vp_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
     }
 

@@ -4,16 +4,15 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Retrieve edge session cookie
+  // 1. Retrieve the sovereign session cookie
   const sessionRoleCookie = request.cookies.get('vp_role');
-  const role = sessionRoleCookie?.value;
+  const role = sessionRoleCookie?.value as 'CLIENT' | 'ADMIN' | undefined;
 
   const isAuthenticated = !!role;
 
-  // Helper flags
+  // Route groupings definitions
   const isAuthRoute = pathname.startsWith('/login');
   
-  // Dashboard routes are client/admin views
   const isDashboardRoute =
     pathname === '/' ||
     pathname.startsWith('/invoices') ||
@@ -21,43 +20,45 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/settings');
 
   const isAdminOnlyRoute = pathname.startsWith('/settings');
+  const isClientOnlyRoute = pathname.startsWith('/invoices') || pathname.startsWith('/payments');
 
-  // 1. Guard against unauthenticated users attempting dashboard access
+  // 2. Guard unauthenticated access
   if (isDashboardRoute && !isAuthenticated) {
     const url = new URL('/login', request.url);
-    // Persist original intent for post-login redirect
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
   }
 
-  // 2. Redirect already logged-in users trying to access login
+  // 3. Redirect authenticated users away from login pages
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/invoices', request.url));
+    // Admins land on their control console, clients land on their invoicing desk
+    const destination = role === 'ADMIN' ? '/settings' : '/invoices';
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
-  // 3. Simple edge-level RBAC block: Client user tries to access Admin route
+  // 4. Strict Role-Based Access Isolation
+  // Gated Admins to their respective pages
   if (isAdminOnlyRoute && role !== 'ADMIN') {
     return NextResponse.redirect(new URL('/unauthorized', request.url));
   }
 
-  // 4. Default root '/' redirect to relevant dashboard home
+  // Gated Clients to their respective pages
+  if (isClientOnlyRoute && role !== 'CLIENT') {
+    return NextResponse.redirect(new URL('/unauthorized', request.url));
+  }
+
+  // 5. Default root routing redirects
   if (pathname === '/' && isAuthenticated) {
-    return NextResponse.redirect(new URL('/invoices', request.url));
+    const destination = role === 'ADMIN' ? '/settings' : '/invoices';
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
   return NextResponse.next();
 }
 
-// Optimization: Apply matcher config to skip running middleware on static resources & assets
+// Skip static bundle directories & system icons
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
