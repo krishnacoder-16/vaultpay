@@ -28,7 +28,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="h-full bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+      <body className="h-full bg-slate-50 text-slate-900 antialiased selection:bg-indigo-600 selection:text-white">
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

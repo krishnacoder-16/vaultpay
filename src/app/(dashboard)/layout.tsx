@@ -24,10 +24,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full bg-slate-950 flex flex-col items-center justify-center text-slate-100">
+      <div className="min-h-screen w-full bg-slate-50 flex flex-col items-center justify-center text-slate-900">
         <div className="relative flex flex-col items-center">
-          <Loader2 className="h-10 w-10 animate-spin text-indigo-500 mb-4" />
-          <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold animate-pulse">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mb-4" />
+          <p className="text-xs text-slate-400 uppercase tracking-widest font-bold animate-pulse">
             Decrypting Core Sessions...
           </p>
         </div>
@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900">
       {/* Primary Sidebar Layout */}
       <Sidebar />
 
@@ -50,7 +50,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Navbar />
 
         {/* Scrollable Workspace panel */}
-        <main className="flex-1 overflow-y-auto bg-slate-950 p-8">
+        <main className="flex-1 overflow-y-auto bg-[#fafbfc] p-8">
           {children}
         </main>
       </div>

@@ -37,20 +37,20 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-900 bg-slate-950 flex flex-col h-full text-slate-200">
-      {/* Sidebar Header Brand */}
-      <div className="h-16 flex items-center px-6 border-b border-slate-900">
+    <aside className="w-64 border-r border-slate-200/80 bg-white flex flex-col h-full text-slate-800 shadow-[1px_0_4px_rgba(0,0,0,0.01)]">
+      {/* Brand Header */}
+      <div className="h-16 flex items-center px-6 border-b border-slate-100">
         <Link href="/invoices" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
             <Sparkles className="h-4.5 w-4.5" />
           </div>
-          <span className="font-bold tracking-tight text-slate-100 text-sm">
-            VaultPay <span className="text-indigo-400">Core</span>
+          <span className="font-bold tracking-tight text-slate-900 text-sm">
+            VaultPay <span className="text-indigo-600 font-semibold">Core</span>
           </span>
         </Link>
       </div>
 
-      {/* Nav Menu items */}
+      {/* Nav Menu Items */}
       <nav className="flex-1 py-6 px-4 space-y-1">
         {navItems
           .filter((item) => item.role === 'ALL' || (user?.role === 'ADMIN' && item.role === 'ADMIN'))
@@ -62,18 +62,18 @@ export default function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 border ${
+                className={`flex items-center gap-3 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all duration-150 border ${
                   isActive
                     ? item.adminOnly
-                      ? 'bg-violet-500/10 border-violet-500/20 text-violet-300'
-                      : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300'
-                    : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'
+                      ? 'bg-violet-50/60 border-violet-100 text-violet-700 shadow-sm'
+                      : 'bg-indigo-50/60 border-indigo-100 text-indigo-700 shadow-sm'
+                    : 'bg-transparent border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                 }`}
               >
-                <Icon className={`h-4.5 w-4.5 ${isActive ? (item.adminOnly ? 'text-violet-400' : 'text-indigo-400') : 'text-slate-500'}`} />
+                <Icon className={`h-4 w-4 ${isActive ? (item.adminOnly ? 'text-violet-600' : 'text-indigo-600') : 'text-slate-400'}`} />
                 <span>{item.name}</span>
                 {item.adminOnly && (
-                  <span className="ml-auto text-[9px] font-semibold bg-violet-500/10 text-violet-400 px-1.5 py-0.5 rounded-md border border-violet-500/20 uppercase tracking-wide">
+                  <span className="ml-auto text-[9px] font-bold bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded border border-violet-100 uppercase tracking-wide">
                     Admin
                   </span>
                 )}
@@ -83,22 +83,22 @@ export default function Sidebar() {
       </nav>
 
       {/* User Session Profile Box */}
-      <div className="p-4 border-t border-slate-900 bg-slate-950/40">
-        <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-900/20 border border-slate-900 mb-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-slate-400 border border-slate-800">
+      <div className="p-4 border-t border-slate-100 bg-slate-50/30">
+        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-slate-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.02)] mb-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-400 border border-slate-200/50">
             <User className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-200 truncate leading-none mb-1">
+            <p className="text-xs font-bold text-slate-800 truncate leading-none mb-1">
               {user?.name || 'User Profile'}
             </p>
-            <p className="text-[10px] text-slate-500 truncate mb-1">
+            <p className="text-[10px] text-slate-400 truncate mb-1">
               {user?.email || 'demo@vaultpay.io'}
             </p>
-            <span className={`inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
+            <span className={`inline-block text-[8px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded ${
               user?.role === 'ADMIN' 
-                ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' 
-                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                ? 'bg-violet-50 text-violet-600 border border-violet-100' 
+                : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
             }`}>
               {user?.role || 'CLIENT'}
             </span>
@@ -108,7 +108,7 @@ export default function Sidebar() {
         {/* Log out option */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-slate-400 hover:text-red-400 rounded-lg hover:bg-red-500/5 transition-all border border-transparent hover:border-red-500/10"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50/5 transition-all border border-transparent hover:border-red-100"
         >
           <LogOut className="h-3.5 w-3.5" />
           Sign Out session
