@@ -17,9 +17,10 @@ export function middleware(request: NextRequest) {
     pathname === '/' ||
     pathname.startsWith('/invoices') ||
     pathname.startsWith('/payments') ||
-    pathname.startsWith('/settings');
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/admin');
 
-  const isAdminOnlyRoute = pathname.startsWith('/settings');
+  const isAdminOnlyRoute = pathname.startsWith('/settings') || pathname.startsWith('/admin');
   const isClientOnlyRoute = pathname.startsWith('/invoices') || pathname.startsWith('/payments');
 
   // 2. Guard unauthenticated access
@@ -32,7 +33,7 @@ export function middleware(request: NextRequest) {
   // 3. Redirect authenticated users away from login pages
   if (isAuthRoute && isAuthenticated) {
     // Admins land on their control console, clients land on their invoicing desk
-    const destination = role === 'ADMIN' ? '/settings' : '/invoices';
+    const destination = role === 'ADMIN' ? '/admin/dashboard' : '/invoices';
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
@@ -49,7 +50,7 @@ export function middleware(request: NextRequest) {
 
   // 5. Default root routing redirects
   if (pathname === '/' && isAuthenticated) {
-    const destination = role === 'ADMIN' ? '/settings' : '/invoices';
+    const destination = role === 'ADMIN' ? '/admin/dashboard' : '/invoices';
     return NextResponse.redirect(new URL(destination, request.url));
   }
 

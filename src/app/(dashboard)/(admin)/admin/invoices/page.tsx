@@ -1,21 +1,21 @@
 'use client';
 
 import React from 'react';
-import { FileText, Receipt, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { FileText, ArrowDownToLine, Plus, Receipt, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 
-export default function InvoicesPage() {
+export default function AdminInvoicesPage() {
   const metrics = [
-    { title: 'Gross Balance Settled', value: '$148,250.00', icon: Receipt, color: 'text-indigo-600 border-indigo-100 bg-indigo-50/50' },
-    { title: 'Awaiting Settlement', value: '$12,400.00', icon: Clock, color: 'text-amber-600 border-amber-100 bg-amber-50/50' },
-    { title: 'Settled Receipts', value: '$135,850.00', icon: CheckCircle2, color: 'text-emerald-600 border-emerald-100 bg-emerald-50/50' },
-    { title: 'Overdue Adjustments', value: '$0.00', icon: AlertCircle, color: 'text-rose-600 border-rose-100 bg-rose-50/50' },
+    { title: 'Global Invoiced', value: '$1,571,400.00', icon: Receipt, color: 'text-violet-600 border-violet-100 bg-violet-50/50' },
+    { title: 'Awaiting Settlement', value: '$142,500.00', icon: Clock, color: 'text-amber-600 border-amber-100 bg-amber-50/50' },
+    { title: 'Settled Invoices', value: '$1,428,900.00', icon: CheckCircle2, color: 'text-emerald-600 border-emerald-100 bg-emerald-50/50' },
+    { title: 'Flagged Disputes', value: '$0.00', icon: AlertCircle, color: 'text-rose-600 border-rose-100 bg-rose-50/50' },
   ];
 
   const mockInvoices = [
-    { id: 'INV-2026-001', billingEntity: 'Acme Global Corp', date: 'May 24, 2026', amount: '$12,500.00', status: 'PAID' },
-    { id: 'INV-2026-002', billingEntity: 'Stark Industries', date: 'May 22, 2026', amount: '$4,800.00', status: 'PAID' },
-    { id: 'INV-2026-003', billingEntity: 'Wayne Enterprise', date: 'May 18, 2026', amount: '$9,200.00', status: 'AWAITING' },
-    { id: 'INV-2026-004', billingEntity: 'LexCorp Ventures', date: 'May 10, 2026', amount: '$3,200.00', status: 'OVERDUE' },
+    { id: 'INV-2026-104', client: 'Acme Global Corp', date: 'May 27, 2026', amount: '$12,500.00', status: 'PAID' },
+    { id: 'INV-2026-103', client: 'Stark Industries', date: 'May 26, 2026', amount: '$8,400.00', status: 'PAID' },
+    { id: 'INV-2026-102', client: 'Wayne Enterprise', date: 'May 25, 2026', amount: '$19,200.00', status: 'AWAITING' },
+    { id: 'INV-2026-101', client: 'LexCorp Ventures', date: 'May 22, 2026', amount: '$4,300.00', status: 'OVERDUE' },
   ];
 
   return (
@@ -24,16 +24,27 @@ export default function InvoicesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2.5">
-            <FileText className="h-5.5 w-5.5 text-indigo-600" />
-            Billing Statements
+            <FileText className="h-5.5 w-5.5 text-violet-600" />
+            Global Invoice Audit
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            View active statements, manage subscription fees, and download receipt documents.
+            Global ledger of all customer invoicing pipelines and billing agreements.
           </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-xs font-bold text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm">
+            <ArrowDownToLine className="h-4 w-4" />
+            Export Audit CSV
+          </button>
+          <button className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-violet-600 hover:bg-violet-755 text-xs font-bold text-white rounded-lg transition-all shadow-sm shadow-violet-600/10 active:scale-[0.98]">
+            <Plus className="h-4 w-4" />
+            Generate Invoice
+          </button>
         </div>
       </div>
 
-      {/* Metrics Grid - Restructured for visual hierarchy and bold values */}
+      {/* Metrics Row - Refocused visual hierarchy with dominating figures */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {metrics.map((m) => {
           const Icon = m.icon;
@@ -51,22 +62,19 @@ export default function InvoicesPage() {
         })}
       </div>
 
-      {/* Customer Billing Ledger Table Card */}
+      {/* Main Ledger Table */}
       <div className="border border-slate-200/80 bg-white rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.01),0_4px_12px_rgba(148,163,184,0.04)]">
-        <div className="px-6 py-4.5 border-b border-slate-100 bg-slate-50/40 flex items-center justify-between">
-          <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Account Statements</h2>
-          <span className="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
-            Secure Portal
-          </span>
+        <div className="px-6 py-4.5 border-b border-slate-100 bg-slate-50/40">
+          <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">All Merchant Invoices</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/20">
-                <th className="px-6 py-3.5 text-[10px]">Statement ID</th>
-                <th className="px-6 py-3.5 text-[10px]">Billing Entity</th>
-                <th className="px-6 py-3.5 text-[10px]">Settlement Date</th>
-                <th className="px-6 py-3.5 text-[10px] text-right">Amount Due</th>
+                <th className="px-6 py-3.5 text-[10px]">Invoice ID</th>
+                <th className="px-6 py-3.5 text-[10px]">Client Target</th>
+                <th className="px-6 py-3.5 text-[10px]">Issuance Date</th>
+                <th className="px-6 py-3.5 text-[10px] text-right">Invoice Total</th>
                 <th className="px-6 py-3.5 text-[10px] text-center">Status</th>
               </tr>
             </thead>
@@ -74,7 +82,7 @@ export default function InvoicesPage() {
               {mockInvoices.map((inv) => (
                 <tr key={inv.id} className="hover:bg-slate-50/70 active:bg-slate-100/50 cursor-pointer transition-all duration-150 group">
                   <td className="px-6 py-4 font-bold text-slate-900">{inv.id}</td>
-                  <td className="px-6 py-4 text-slate-700 font-bold group-hover:text-indigo-600 transition-colors">{inv.billingEntity}</td>
+                  <td className="px-6 py-4 text-slate-700 font-bold group-hover:text-violet-600 transition-colors">{inv.client}</td>
                   <td className="px-6 py-4 text-slate-500 font-medium">{inv.date}</td>
                   <td className="px-6 py-4 text-right font-bold text-slate-900 tracking-tight">{inv.amount}</td>
                   <td className="px-6 py-4 text-center">

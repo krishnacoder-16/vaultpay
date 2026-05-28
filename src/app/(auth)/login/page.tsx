@@ -22,7 +22,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       // Sovereign dynamic routing based on the authorized profile role
-      const targetDestination = searchParams.get('callbackUrl') || (user.role === 'ADMIN' ? '/settings' : '/invoices');
+      const targetDestination = searchParams.get('callbackUrl') || (user.role === 'ADMIN' ? '/admin/dashboard' : '/invoices');
       router.push(targetDestination);
     }
   }, [isAuthenticated, user, router, searchParams]);
@@ -40,7 +40,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-white border border-slate-200/80 p-8 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02),0_12px_32px_rgba(148,163,184,0.12)]">
+    <div className="bg-white border border-slate-200/80 p-10 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02),0_12px_32px_rgba(148,163,184,0.12)]">
       {/* Brand Header */}
       <div className="flex flex-col items-center mb-8">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 mb-3 shadow-sm">
@@ -140,9 +140,9 @@ export default function LoginPage() {
       </form>
 
       {/* Security note */}
-      <div className="mt-6 text-center">
-        <p className="text-[10px] text-slate-400 font-medium tracking-widest uppercase">
-          SECURE MOCK ENVIRONMENT • PCI COMPLIANCE SIMULATION
+      <div className="mt-8 text-center pt-4 border-t border-slate-100/80">
+        <p className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">
+          Secure financial operations workspace
         </p>
       </div>
     </div>

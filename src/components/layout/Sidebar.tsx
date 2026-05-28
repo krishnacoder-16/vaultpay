@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/stores/use-auth-store';
-import { FileText, CreditCard, Settings, LogOut, User, Sparkles } from 'lucide-react';
+import { FileText, CreditCard, Settings, LogOut, User, Sparkles, LayoutDashboard, Users } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -16,6 +16,7 @@ export default function Sidebar() {
 
   // Structured menu items with strict role mapping
   const navItems = [
+    // Client Specific Menu
     {
       name: 'Invoices',
       href: '/invoices',
@@ -28,20 +29,42 @@ export default function Sidebar() {
       icon: CreditCard,
       role: 'CLIENT',
     },
+    // Admin Specific Menu (Completely Refocused on Real Billing Operations)
     {
-      name: 'Admin Settings',
-      href: '/settings',
-      icon: Settings,
+      name: 'Dashboard',
+      href: '/admin/dashboard',
+      icon: LayoutDashboard,
+      role: 'ADMIN',
+      adminOnly: true,
+    },
+    {
+      name: 'Invoices',
+      href: '/admin/invoices',
+      icon: FileText,
+      role: 'ADMIN',
+      adminOnly: true,
+    },
+    {
+      name: 'Clients',
+      href: '/admin/clients',
+      icon: Users,
+      role: 'ADMIN',
+      adminOnly: true,
+    },
+    {
+      name: 'Payments',
+      href: '/admin/payments',
+      icon: CreditCard,
       role: 'ADMIN',
       adminOnly: true,
     },
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-200/80 bg-white flex flex-col h-full text-slate-800 shadow-[1px_0_4px_rgba(0,0,0,0.01)]">
+    <aside className="w-56 border-r border-slate-200/80 bg-white flex flex-col h-full text-slate-800 shadow-[1px_0_4px_rgba(0,0,0,0.01)]">
       {/* Brand Header */}
       <div className="h-16 flex items-center px-6 border-b border-slate-100">
-        <Link href={user?.role === 'ADMIN' ? '/settings' : '/invoices'} className="flex items-center gap-2.5">
+        <Link href={user?.role === 'ADMIN' ? '/admin/dashboard' : '/invoices'} className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
             <Sparkles className="h-4.5 w-4.5" />
           </div>
@@ -73,11 +96,6 @@ export default function Sidebar() {
               >
                 <Icon className={`h-4 w-4 ${isActive ? (item.adminOnly ? 'text-violet-600' : 'text-indigo-600') : 'text-slate-400'}`} />
                 <span>{item.name}</span>
-                {item.adminOnly && (
-                  <span className="ml-auto text-[9px] font-bold bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded border border-violet-100 uppercase tracking-wide">
-                    Admin
-                  </span>
-                )}
               </Link>
             );
           })}
