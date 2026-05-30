@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface ClientRecord {
   id: string;
@@ -22,14 +23,21 @@ const initialClients: ClientRecord[] = [
   { id: 'cli_04', name: 'LexCorp Ventures', email: 'billing@lexcorp.com', plan: 'Basic Core License', status: 'SUSPENDED', spent: '$12,300.00' },
 ];
 
-export const useClientStore = create<ClientState>((set) => ({
-  clients: initialClients,
+export const useClientStore = create<ClientState>()(
+  persist(
+    (set) => ({
+      clients: initialClients,
 
-  addClient: (client: ClientRecord) =>
-    set((state) => ({
-      clients: [client, ...state.clients], // Inserts at the top of the list!
-    })),
+      addClient: (client: ClientRecord) =>
+        set((state) => ({
+          clients: [client, ...state.clients], // Inserts at the top of the list!
+        })),
 
-  resetClients: () =>
-    set({ clients: initialClients }),
-}));
+      resetClients: () =>
+        set({ clients: initialClients }),
+    }),
+    {
+      name: 'vp_clients_directory', // Persist key in localStorage
+    }
+  )
+);

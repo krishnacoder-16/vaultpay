@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface Invoice {
   id: string;
@@ -24,28 +25,35 @@ const initialInvoices: Invoice[] = [
   { id: 'INV-2026-004', billingEntity: 'LexCorp Ventures', date: 'May 10, 2026', amount: '$3,200.00', status: 'OVERDUE', type: 'Core License' },
 ];
 
-export const useInvoiceStore = create<InvoiceState>((set) => ({
-  invoices: initialInvoices,
+export const useInvoiceStore = create<InvoiceState>()(
+  persist(
+    (set) => ({
+      invoices: initialInvoices,
 
-  markAsPaid: (id: string) =>
-    set((state) => ({
-      invoices: state.invoices.map((inv) =>
-        inv.id === id ? { ...inv, status: 'PAID' as const } : inv
-      ),
-    })),
+      markAsPaid: (id: string) =>
+        set((state) => ({
+          invoices: state.invoices.map((inv) =>
+            inv.id === id ? { ...inv, status: 'PAID' as const } : inv
+          ),
+        })),
 
-  setProcessing: (id: string) =>
-    set((state) => ({
-      invoices: state.invoices.map((inv) =>
-        inv.id === id ? { ...inv, status: 'PROCESSING' as const } : inv
-      ),
-    })),
+      setProcessing: (id: string) =>
+        set((state) => ({
+          invoices: state.invoices.map((inv) =>
+            inv.id === id ? { ...inv, status: 'PROCESSING' as const } : inv
+          ),
+        })),
 
-  addInvoice: (invoice: Invoice) =>
-    set((state) => ({
-      invoices: [invoice, ...state.invoices], // Prepends at the top row!
-    })),
+      addInvoice: (invoice: Invoice) =>
+        set((state) => ({
+          invoices: [invoice, ...state.invoices], // Prepends at the top row!
+        })),
 
-  resetInvoices: () =>
-    set({ invoices: initialInvoices }),
-}));
+      resetInvoices: () =>
+        set({ invoices: initialInvoices }),
+    }),
+    {
+      name: 'vp_invoices_ledger', // Persist key in localStorage
+    }
+  )
+);
