@@ -95,7 +95,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     if (typeof window !== 'undefined') {
       // Sovereign Cookie Authority: Set session cookie for Edge Middleware checks
-      document.cookie = `vp_role=${role}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `vp_role=${role}; path=/; SameSite=Lax`;
       
       // Optional display persistence
       localStorage.setItem('vp_user', JSON.stringify(sessionUser));
