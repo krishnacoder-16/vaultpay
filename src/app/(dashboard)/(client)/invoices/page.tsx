@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useInvoiceStore } from '@/features/invoices/stores/use-invoice-store';
 import { useCheckoutMutation } from '@/features/payments/hooks/use-checkout-mutation';
 import { useDownloadMutation } from '@/features/invoices/hooks/use-download-mutation';
 import { FileText, Receipt, Clock, CheckCircle2, AlertCircle, Loader2, Sparkles, X, ChevronRight } from 'lucide-react';
 
-export default function InvoicesPage() {
+function InvoicesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { invoices } = useInvoiceStore();
@@ -262,7 +262,7 @@ export default function InvoicesPage() {
                         >
                           {isDownloadingThis ? (
                             <>
-                              <Loader2 className="h-3 w-3 animate-spin text-emerald-600" />
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-600" />
                               Downloading...
                             </>
                           ) : (
@@ -320,5 +320,18 @@ export default function InvoicesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-slate-200 min-h-[300px]">
+        <Loader2 className="h-6 w-6 animate-spin text-indigo-600 mb-3" />
+        <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Loading statements...</p>
+      </div>
+    }>
+      <InvoicesContent />
+    </Suspense>
   );
 }

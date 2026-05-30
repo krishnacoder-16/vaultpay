@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/stores/use-auth-store';
 import { ShieldCheck, UserCheck, Mail, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -146,5 +146,18 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-white border border-slate-200/80 p-12 rounded-2xl shadow-sm text-center flex flex-col items-center justify-center min-w-[320px]">
+        <Loader2 className="h-6 w-6 animate-spin text-indigo-600 mb-3" />
+        <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Initializing session...</p>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
