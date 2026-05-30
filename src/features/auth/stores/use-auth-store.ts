@@ -62,8 +62,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (!hydratedUser) {
         hydratedUser = {
           id: activeRole === 'ADMIN' ? 'usr_admin_default' : 'usr_client_default',
-          email: activeRole === 'ADMIN' ? 'compliance@vaultpay.io' : 'merchant@vaultpay.io',
-          name: activeRole === 'ADMIN' ? 'Compliance Admin' : 'Merchant Client',
+          email: activeRole === 'ADMIN' ? 'finance@vaultpay.io' : 'merchant@vaultpay.io',
+          name: activeRole === 'ADMIN' ? 'Finance Administrator' : 'Merchant Client',
           role: activeRole,
         };
         localStorage.setItem('vp_user', JSON.stringify(hydratedUser));
@@ -89,7 +89,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const sessionUser: User = {
       id: role === 'ADMIN' ? 'usr_admin_01' : 'usr_client_01',
       email: email,
-      name: role === 'ADMIN' ? 'Compliance Admin' : 'Merchant Client',
+      name: role === 'ADMIN' ? 'Finance Administrator' : 'Merchant Client',
       role,
     };
 

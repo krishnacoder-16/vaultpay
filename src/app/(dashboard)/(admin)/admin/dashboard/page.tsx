@@ -71,22 +71,6 @@ export default function AdminDashboardPage() {
             Global administrative view of transaction pipelines, client ledgers, and revenue flows.
           </p>
         </div>
-
-        {/* Quick Operations Panel */}
-        <div className="flex items-center gap-2">
-          <button className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-xs font-bold text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm">
-            <ArrowDownToLine className="h-3.5 w-3.5" />
-            Export CSV
-          </button>
-          <button className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-xs font-bold text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm">
-            <Filter className="h-3.5 w-3.5" />
-            Filter
-          </button>
-          <button className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-violet-600 hover:bg-violet-700 text-xs font-bold text-white rounded-lg transition-all shadow-sm shadow-violet-600/10 active:scale-[0.98]">
-            <Plus className="h-3.5 w-3.5" />
-            Create Invoice
-          </button>
-        </div>
       </div>
 
       {/* Primary KPI Grid */}

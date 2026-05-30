@@ -13,6 +13,7 @@ interface InvoiceState {
   invoices: Invoice[];
   markAsPaid: (id: string) => void;
   setProcessing: (id: string) => void;
+  addInvoice: (invoice: Invoice) => void;
   resetInvoices: () => void;
 }
 
@@ -38,6 +39,11 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       invoices: state.invoices.map((inv) =>
         inv.id === id ? { ...inv, status: 'PROCESSING' as const } : inv
       ),
+    })),
+
+  addInvoice: (invoice: Invoice) =>
+    set((state) => ({
+      invoices: [invoice, ...state.invoices], // Prepends at the top row!
     })),
 
   resetInvoices: () =>

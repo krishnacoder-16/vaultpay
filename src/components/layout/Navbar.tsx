@@ -33,7 +33,7 @@ export default function Navbar() {
         <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
           <ShieldCheck className="h-4 w-4 text-indigo-600" />
           <span className="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">
-            {user?.role === 'ADMIN' ? 'Compliance Admin' : 'Merchant Secure'}
+            {user?.role === 'ADMIN' ? 'Finance Administrator' : 'Merchant Secure'}
           </span>
         </div>
       </div>
