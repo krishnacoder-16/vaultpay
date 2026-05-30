@@ -4,18 +4,25 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useInvoiceStore } from '@/features/invoices/stores/use-invoice-store';
 import { useCheckoutMutation } from '@/features/payments/hooks/use-checkout-mutation';
-import { FileText, Receipt, Clock, CheckCircle2, AlertCircle, Loader2, Sparkles, X } from 'lucide-react';
+import { useDownloadMutation } from '@/features/invoices/hooks/use-download-mutation';
+import { FileText, Receipt, Clock, CheckCircle2, AlertCircle, Loader2, Sparkles, X, ChevronRight } from 'lucide-react';
 
 export default function InvoicesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { invoices } = useInvoiceStore();
   const checkoutMutation = useCheckoutMutation();
+  const downloadMutation = useDownloadMutation();
 
   // Success toast/banner state
   const [successBanner, setSuccessBanner] = useState<{ visible: boolean; invId: string | null }>({
     visible: false,
     invId: null,
+  });
+
+  const [downloadBanner, setDownloadBanner] = useState<{ message: string; type: 'success' | 'error' | null }>({
+    message: '',
+    type: null,
   });
 
   useEffect(() => {
@@ -63,13 +70,63 @@ export default function InvoicesPage() {
     }
   };
 
-  const handleDownloadReceipt = (invoiceId: string) => {
-    // Simulated receipt download trigger
-    alert(`Receipt for ${invoiceId} is generating in the background. Your download will begin shortly.`);
+  const handleDownloadReceipt = async (invoiceId: string) => {
+    const inv = invoices.find(i => i.id === invoiceId);
+    if (!inv) return;
+    try {
+      await downloadMutation.mutateAsync({ invoice: inv, isReceipt: true });
+      setDownloadBanner({
+        message: 'Receipt PDF downloaded successfully.',
+        type: 'success',
+      });
+      setTimeout(() => {
+        setDownloadBanner(prev => prev.type === 'success' ? { message: '', type: null } : prev);
+      }, 4000);
+    } catch (err: any) {
+      setDownloadBanner({
+        message: err.message || 'Unable to download receipt PDF.',
+        type: 'error',
+      });
+    }
+  };
+
+  const handleRowClick = (id: string, e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    // Don't navigate if clicking a button or another interactive element
+    if (target.closest('button') || target.closest('a')) {
+      return;
+    }
+    router.push(`/invoices/${id}`);
   };
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Download Success/Error Toast */}
+      {downloadBanner.type && (
+        <div className={`p-4 border rounded-2xl flex items-center justify-between shadow-sm transition-all animate-in fade-in slide-in-from-top-4 duration-300 ${
+          downloadBanner.type === 'success'
+            ? 'border-emerald-100 bg-emerald-50/50 text-emerald-800'
+            : 'border-rose-100 bg-rose-50/50 text-rose-800'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className={`flex h-7 w-7 items-center justify-center rounded-lg shadow-sm shrink-0 ${
+              downloadBanner.type === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+            }`}>
+              {downloadBanner.type === 'success' ? <CheckCircle2 className="h-4.5 w-4.5" /> : <AlertCircle className="h-4.5 w-4.5" />}
+            </div>
+            <p className="text-xs font-bold leading-normal">{downloadBanner.message}</p>
+          </div>
+          <button
+            onClick={() => setDownloadBanner({ message: '', type: null })}
+            className={`p-1 transition-colors ${
+              downloadBanner.type === 'success' ? 'text-emerald-500 hover:text-emerald-700' : 'text-rose-500 hover:text-rose-700'
+            }`}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Success Notification Banner */}
       {successBanner.visible && (
         <div className="p-4 border border-emerald-100 bg-emerald-50/50 rounded-2xl flex items-center justify-between text-emerald-800 shadow-sm transition-all animate-in fade-in slide-in-from-top-4 duration-300">
@@ -166,10 +223,20 @@ export default function InvoicesPage() {
                 const isThisPending = checkoutMutation.isPending && checkoutMutation.variables?.invoiceId === inv.id;
                 const isAnyPending = checkoutMutation.isPending;
 
+                const isDownloadingThis = downloadMutation.isPending && downloadMutation.variables?.invoice.id === inv.id;
+
                 return (
-                  <tr key={inv.id} className="hover:bg-slate-50/70 active:bg-slate-100/50 transition-all duration-150 group">
-                    <td className="px-6 py-4 font-bold text-slate-900">{inv.id}</td>
-                    <td className="px-6 py-4 text-slate-700 font-bold group-hover:text-indigo-600 transition-colors">{inv.billingEntity}</td>
+                  <tr 
+                    key={inv.id} 
+                    onClick={(e) => handleRowClick(inv.id, e)}
+                    className="hover:bg-slate-50/70 active:bg-slate-100/50 cursor-pointer transition-all duration-150 group"
+                    title="Click to view full invoice & receipt details"
+                  >
+                    <td className="px-6 py-4 font-bold text-slate-900 group-hover:text-indigo-600 transition-colors flex items-center gap-1.5">
+                      {inv.id}
+                      <ChevronRight className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </td>
+                    <td className="px-6 py-4 text-slate-700 font-bold transition-colors">{inv.billingEntity}</td>
                     <td className="px-6 py-4 text-slate-500 font-medium">{inv.date}</td>
                     <td className="px-6 py-4 text-right font-bold text-slate-900 tracking-tight">{inv.amount}</td>
                     <td className="px-6 py-4 text-center">
@@ -190,9 +257,17 @@ export default function InvoicesPage() {
                       {inv.status === 'PAID' && (
                         <button
                           onClick={() => handleDownloadReceipt(inv.id)}
-                          className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100/60 px-3 py-1.5 rounded-lg border border-emerald-100 transition-all cursor-pointer shadow-sm"
+                          disabled={isDownloadingThis}
+                          className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100/60 px-3 py-1.5 rounded-lg border border-emerald-100 transition-all cursor-pointer shadow-sm disabled:opacity-50"
                         >
-                          Download Receipt
+                          {isDownloadingThis ? (
+                            <>
+                              <Loader2 className="h-3 w-3 animate-spin text-emerald-600" />
+                              Downloading...
+                            </>
+                          ) : (
+                            'Download Receipt'
+                          )}
                         </button>
                       )}
 

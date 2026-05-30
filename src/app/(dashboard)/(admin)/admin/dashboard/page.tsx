@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useInvoiceStore } from '@/features/invoices/stores/use-invoice-store';
 import { 
   TrendingUp, 
   Clock, 
@@ -13,32 +15,47 @@ import {
   Filter, 
   LayoutDashboard,
   Calendar,
-  ArrowUpRight
+  ArrowUpRight,
+  ChevronRight
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+  const { invoices } = useInvoiceStore();
+
+  // Dynamic KPI math using baseline enterprise mock constants
+  const paidInvoices = invoices.filter(inv => inv.status === 'PAID');
+  const outstandingInvoices = invoices.filter(inv => inv.status === 'AWAITING' || inv.status === 'OVERDUE');
+  const overdueInvoices = invoices.filter(inv => inv.status === 'OVERDUE');
+
+  const dynamicPaidSum = paidInvoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace('$', '').replace(',', '')), 0);
+  const dynamicOutstandingSum = outstandingInvoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace('$', '').replace(',', '')), 0);
+
+  // High-trust large business baseline alignment
+  const totalRevenue = 1411600.00 + dynamicPaidSum;
+  const outstandingPayments = 130100.00 + dynamicOutstandingSum;
+  const paidCount = 640 + paidInvoices.length;
+  const overdueCount = 16 + overdueInvoices.length;
+
   const metrics = [
-    { title: 'Total Revenue', value: '$1,428,900.00', icon: TrendingUp, color: 'text-violet-600 border-violet-100 bg-violet-50/50', change: '+14.2% MoM' },
-    { title: 'Outstanding Payments', value: '$142,500.00', icon: Clock, color: 'text-amber-600 border-amber-100 bg-amber-50/50', change: '18 invoices' },
-    { title: 'Paid Invoices', value: '642', icon: CheckCircle2, color: 'text-emerald-600 border-emerald-100 bg-emerald-50/50', change: '96.2% rate' },
-    { title: 'Overdue Invoices', value: '18', icon: AlertCircle, color: 'text-rose-600 border-rose-100 bg-rose-50/50', change: 'Requires review' },
+    { title: 'Total Revenue', value: `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, icon: TrendingUp, color: 'text-violet-600 border-violet-100 bg-violet-50/50', change: '+14.2% MoM' },
+    { title: 'Outstanding Payments', value: `$${outstandingPayments.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, icon: Clock, color: 'text-amber-600 border-amber-100 bg-amber-50/50', change: `${outstandingInvoices.length} active bills` },
+    { title: 'Paid Invoices', value: `${paidCount}`, icon: CheckCircle2, color: 'text-emerald-600 border-emerald-100 bg-emerald-50/50', change: '96.2% rate' },
+    { title: 'Overdue Invoices', value: `${overdueCount}`, icon: AlertCircle, color: 'text-rose-600 border-rose-100 bg-rose-50/50', change: 'Requires review' },
     { title: 'Monthly Revenue', value: '$128,450.00', icon: Calendar, color: 'text-indigo-600 border-indigo-100 bg-indigo-50/50', change: 'Current Month' },
     { title: 'Active Clients', value: '104', icon: Users, color: 'text-blue-600 border-blue-100 bg-blue-50/50', change: '+4 new' },
   ];
 
-  const mockInvoices = [
-    { id: 'INV-2026-104', client: 'Acme Global Corp', date: 'May 27, 2026', amount: '$12,500.00', status: 'PAID', type: 'SaaS Agreement' },
-    { id: 'INV-2026-103', client: 'Stark Industries', date: 'May 26, 2026', amount: '$8,400.00', status: 'PAID', type: 'API Enterprise' },
-    { id: 'INV-2026-102', client: 'Wayne Enterprise', date: 'May 25, 2026', amount: '$19,200.00', status: 'AWAITING', type: 'Custom SLA' },
-    { id: 'INV-2026-101', client: 'LexCorp Ventures', date: 'May 22, 2026', amount: '$4,300.00', status: 'OVERDUE', type: 'Core License' },
-    { id: 'INV-2026-100', client: 'Oscorp Biotech', date: 'May 20, 2026', amount: '$7,100.00', status: 'PAID', type: 'SaaS Agreement' },
-  ];
-
+  // Dynamic Recent Activity logs aligned with store status
   const recentActivity = [
-    { type: 'PAYMENT', text: 'Stark Industries paid invoice INV-2026-103', time: '12m ago', amount: '$8,400.00' },
-    { type: 'INVOICE', text: 'Acme Global Corp generated invoice INV-2026-104', time: '1h ago', amount: '$12,500.00' },
-    { type: 'REMINDER', text: 'Sent overdue invoice notice to LexCorp Ventures', time: '3h ago', amount: null },
-    { type: 'PAYMENT', text: 'Wayne Enterprise settled balance adjustment txn_932', time: '5h ago', amount: '$3,100.00' },
+    { type: 'INVOICE', text: 'LexCorp Ventures statement INV-2026-004 is overdue', time: 'Term past due limit', amount: '$3,200.00' },
+    { type: 'PAYMENT', text: 'Acme Global Corp settled invoice INV-2026-001', time: 'Completed on secure portal', amount: '$12,500.00' },
+    ...invoices.filter(i => i.status === 'PAID' && i.id !== 'INV-2026-001').map(i => ({
+      type: 'PAYMENT',
+      text: `${i.billingEntity} paid invoice ${i.id}`,
+      time: 'Live Settlement',
+      amount: i.amount
+    }))
   ];
 
   return (
@@ -72,7 +89,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Primary KPI Grid - Restructured for strong visual dominance and balance */}
+      {/* Primary KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {metrics.map((m) => {
           const Icon = m.icon;
@@ -119,10 +136,18 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {mockInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50/70 active:bg-slate-100/50 cursor-pointer transition-all duration-150 group">
-                    <td className="px-6 py-4 font-bold text-slate-900">{inv.id}</td>
-                    <td className="px-6 py-4 text-slate-700 font-bold group-hover:text-violet-600 transition-colors">{inv.client}</td>
+                {invoices.map((inv) => (
+                  <tr 
+                    key={inv.id} 
+                    onClick={() => router.push(`/admin/invoices/${inv.id}`)}
+                    className="hover:bg-slate-50/70 active:bg-slate-100/50 cursor-pointer transition-all duration-150 group"
+                    title="Click to view official commercial document"
+                  >
+                    <td className="px-6 py-4 font-bold text-slate-900 group-hover:text-violet-600 transition-colors flex items-center gap-1.5">
+                      {inv.id}
+                      <ChevronRight className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </td>
+                    <td className="px-6 py-4 text-slate-700 font-bold transition-colors">{inv.billingEntity}</td>
                     <td className="px-6 py-4 text-slate-500 font-medium">{inv.type}</td>
                     <td className="px-6 py-4 text-right font-bold text-slate-900 tracking-tight">{inv.amount}</td>
                     <td className="px-6 py-4 text-center">
@@ -131,7 +156,9 @@ export default function AdminDashboardPage() {
                           ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
                           : inv.status === 'AWAITING'
                           ? 'bg-amber-50 border-amber-100 text-amber-700'
-                          : 'bg-rose-50 border-rose-100 text-rose-700'
+                          : inv.status === 'OVERDUE'
+                          ? 'bg-rose-50 border-rose-100 text-rose-700'
+                          : 'bg-slate-100 border-slate-200 text-slate-500 animate-pulse'
                       }`}>
                         {inv.status}
                       </span>

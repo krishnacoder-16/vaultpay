@@ -1,21 +1,32 @@
 'use client';
 
 import React from 'react';
-import { FileText, ArrowDownToLine, Plus, Receipt, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useInvoiceStore } from '@/features/invoices/stores/use-invoice-store';
+import { FileText, ArrowDownToLine, Plus, Receipt, Clock, CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
 
 export default function AdminInvoicesPage() {
-  const metrics = [
-    { title: 'Global Invoiced', value: '$1,571,400.00', icon: Receipt, color: 'text-violet-600 border-violet-100 bg-violet-50/50' },
-    { title: 'Awaiting Settlement', value: '$142,500.00', icon: Clock, color: 'text-amber-600 border-amber-100 bg-amber-50/50' },
-    { title: 'Settled Invoices', value: '$1,428,900.00', icon: CheckCircle2, color: 'text-emerald-600 border-emerald-100 bg-emerald-50/50' },
-    { title: 'Flagged Disputes', value: '$0.00', icon: AlertCircle, color: 'text-rose-600 border-rose-100 bg-rose-50/50' },
-  ];
+  const router = useRouter();
+  const { invoices } = useInvoiceStore();
 
-  const mockInvoices = [
-    { id: 'INV-2026-104', client: 'Acme Global Corp', date: 'May 27, 2026', amount: '$12,500.00', status: 'PAID' },
-    { id: 'INV-2026-103', client: 'Stark Industries', date: 'May 26, 2026', amount: '$8,400.00', status: 'PAID' },
-    { id: 'INV-2026-102', client: 'Wayne Enterprise', date: 'May 25, 2026', amount: '$19,200.00', status: 'AWAITING' },
-    { id: 'INV-2026-101', client: 'LexCorp Ventures', date: 'May 22, 2026', amount: '$4,300.00', status: 'OVERDUE' },
+  // Dynamic KPI math using baseline enterprise mock constants
+  const paidInvoices = invoices.filter(inv => inv.status === 'PAID');
+  const outstandingInvoices = invoices.filter(inv => inv.status === 'AWAITING' || inv.status === 'OVERDUE');
+
+  const dynamicPaidSum = paidInvoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace('$', '').replace(',', '')), 0);
+  const dynamicOutstandingSum = outstandingInvoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace('$', '').replace(',', '')), 0);
+  const dynamicTotalSum = invoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace('$', '').replace(',', '')), 0);
+
+  // High-trust large business baseline alignment
+  const globalInvoiced = 1554100.00 + dynamicTotalSum;
+  const awaitingSettlement = 130100.00 + dynamicOutstandingSum;
+  const settledInvoices = 1411600.00 + dynamicPaidSum;
+
+  const metrics = [
+    { title: 'Global Invoiced', value: `$${globalInvoiced.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, icon: Receipt, color: 'text-violet-600 border-violet-100 bg-violet-50/50' },
+    { title: 'Awaiting Settlement', value: `$${awaitingSettlement.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, icon: Clock, color: 'text-amber-600 border-amber-100 bg-amber-50/50' },
+    { title: 'Settled Invoices', value: `$${settledInvoices.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, icon: CheckCircle2, color: 'text-emerald-600 border-emerald-100 bg-emerald-50/50' },
+    { title: 'Flagged Disputes', value: '$0.00', icon: AlertCircle, color: 'text-rose-600 border-rose-100 bg-rose-50/50' },
   ];
 
   return (
@@ -33,18 +44,18 @@ export default function AdminInvoicesPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-xs font-bold text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm">
+          <button className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-xs font-bold text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm cursor-pointer">
             <ArrowDownToLine className="h-4 w-4" />
             Export Audit CSV
           </button>
-          <button className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-violet-600 hover:bg-violet-755 text-xs font-bold text-white rounded-lg transition-all shadow-sm shadow-violet-600/10 active:scale-[0.98]">
+          <button className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-violet-600 hover:bg-violet-700 text-xs font-bold text-white rounded-lg transition-all shadow-sm shadow-violet-600/10 active:scale-[0.98] cursor-pointer">
             <Plus className="h-4 w-4" />
             Generate Invoice
           </button>
         </div>
       </div>
 
-      {/* Metrics Row - Refocused visual hierarchy with dominating figures */}
+      {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {metrics.map((m) => {
           const Icon = m.icon;
@@ -79,19 +90,29 @@ export default function AdminInvoicesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {mockInvoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-slate-50/70 active:bg-slate-100/50 cursor-pointer transition-all duration-150 group">
-                  <td className="px-6 py-4 font-bold text-slate-900">{inv.id}</td>
-                  <td className="px-6 py-4 text-slate-700 font-bold group-hover:text-violet-600 transition-colors">{inv.client}</td>
+              {invoices.map((inv) => (
+                <tr 
+                  key={inv.id} 
+                  onClick={() => router.push(`/admin/invoices/${inv.id}`)}
+                  className="hover:bg-slate-50/70 active:bg-slate-100/50 cursor-pointer transition-all duration-150 group"
+                  title="Click to view official commercial document"
+                >
+                  <td className="px-6 py-4 font-bold text-slate-900 group-hover:text-violet-600 transition-colors flex items-center gap-1.5">
+                    {inv.id}
+                    <ChevronRight className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </td>
+                  <td className="px-6 py-4 text-slate-700 font-bold transition-colors">{inv.billingEntity}</td>
                   <td className="px-6 py-4 text-slate-500 font-medium">{inv.date}</td>
                   <td className="px-6 py-4 text-right font-bold text-slate-900 tracking-tight">{inv.amount}</td>
                   <td className="px-6 py-4 text-center">
-                    <span className={`inline-block text-[9px] font-bold px-2.5 py-0.5 rounded-full border ${
+                    <span className={`inline-block text-[9px] font-bold px-2.5 py-0.5 rounded-full border transition-all ${
                       inv.status === 'PAID'
                         ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
                         : inv.status === 'AWAITING'
                         ? 'bg-amber-50 border-amber-100 text-amber-700'
-                        : 'bg-rose-50 border-rose-100 text-rose-700'
+                        : inv.status === 'OVERDUE'
+                        ? 'bg-rose-50 border-rose-100 text-rose-700'
+                        : 'bg-slate-100 border-slate-200 text-slate-500 animate-pulse'
                     }`}>
                       {inv.status}
                     </span>
