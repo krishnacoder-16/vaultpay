@@ -5,13 +5,13 @@
 🔗 Live Demo: [https://vaultpay-9pqp.vercel.app/login](https://vaultpay-9pqp.vercel.app/login)
 
 ### 🔑 Secure Gateway Authentication
-![Login Page](/login.png)
+![Login Page](public/login.png)
 
 ### 📈 Finance Admin Console (Operations Console)
-![Admin Page](/admin.png)
+![Admin Page](public/admin.png)
 
 ### 📁 Client Billing Portal (Statements Console)
-![Client Page](/client.png)
+![Client Page](public/client.png)
 
 ---
 
